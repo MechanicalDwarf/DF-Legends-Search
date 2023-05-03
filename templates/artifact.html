@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Artifact: {{ artifact['name'] }}{% endblock %}
+{% block content %}
+<div>
+	<h2>{{ artifact['name'] }}</h2>
+	{% if artifact['site'] != '' %}
+	<h3>Site: <a href="/site?id={{ artifact['site']['id'] }}">{{ artifact['site']['name'] }}</a></h3>
+	{% endif %}
+	{% if artifact['holder'] != '' %}
+	<h3>Held by: <a href="/histfig?id={{ artifact['holder']['id'] }}">{{ artifact['holder']['name'] }}</a></h3>
+	{% endif %}
+	{% if artifact['historical_events']|length > 0 %}
+	<h3>Related historical events:</h3>
+	<ul>
+		{% for event in artifact['historical_events'] %}
+		<li>
+			{{ event['year'] }}: <a href="/event?id={{ event['id'] }}">{{ event['type'] }}</a>
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+</div>
+{% endblock %}

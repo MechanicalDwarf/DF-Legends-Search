@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Site: {{ site['name'] }}{% endblock %}
+{% block content %}
+<div>
+	<h2>{{ site['name'] }}</h2>
+	<h3>Type: {{ site['type'] }}</h3>
+	<h3>Coordinates: {{ site['coords'] }}</h3>
+	{% if site['histfigs']|length > 0 %}
+	<h3>Linked historical figures:</h3>
+	<ul>
+		{% for histfig in site['histfigs'] %}
+		<li>
+			{{ histfig['link_type'] }}: <a href="/histfig?id={{ histfig['id'] }}">{{ histfig['name'] }}</a>
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	{% if site['artifacts']|length > 0 %}
+	<h3>Artifacts at site:</h3>
+	<ul>
+		{% for artifact in site['artifacts'] %}
+		<li>
+			<a href="/artifact?id={{ artifact['id'] }}">{{ artifact['name'] }}</a>
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	{% if site['historical_events']|length > 0 %}
+	<h3>Related historical events:</h3>
+	<ul>
+		{% for event in site['historical_events'] %}
+		<li>
+			{{ event['year'] }}: <a href="/event?id={{ event['id'] }}">{{ event['type'] }}</a>
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+</div>
+{% endblock %}

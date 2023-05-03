@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Event: {{ event['type'] }}{% endblock %}
+{% block content %}
+<div>
+	<h2>{{ event['type'] }}</h2>
+	<h3>Year: {{ event['year'] }}</h3>
+	{% if event['state'] != '' %}
+	<h3>State: {{ event['state'] }}</h3>
+	{% endif %}
+	{% if event['coords'] != '' %}
+	<h3>Coordinates: {{ event['coords'] }}</h3>
+	{% endif %}
+	{% if event['knowledge'] != '' %}
+	<h3>Knowledge: {{ event['knowledge'] }}</h3>
+	{% endif %}
+	{% if event['histfig'] != '' %}
+	<h3>Historical figure: <a href="/histfig?id={{ event['histfig']['id'] }}">{{ event['histfig']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['site'] != '' %}
+	<h3>Site: <a href="/site?id={{ event['site']['id'] }}">{{ event['site']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['artifact'] != '' %}
+	<h3>Artifact: <a href="/artifact?id={{ event['artifact']['id'] }}">{{ event['artifact']['name'] }}</a></h3>
+	{% endif %}
+</div>
+{% endblock %}

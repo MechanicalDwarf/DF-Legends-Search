@@ -1,0 +1,27 @@
+.header-title {
+	max-width: 100%;
+	margin: auto; 
+	background-color: lightgrey;
+	padding: 5px;
+}
+.header-outer {
+	margin: auto;
+	background-color: grey;
+}
+body {
+	background-color: grey;
+	font-size: 2em;
+}
+.body-outer {
+	margin: auto;
+	background-color: grey;
+}
+.body-inner {
+	max-width: 100%;
+	margin: auto;
+	background-color: lightgrey;
+	padding: 5px;
+}
+input {
+	height: 2.5em
+}

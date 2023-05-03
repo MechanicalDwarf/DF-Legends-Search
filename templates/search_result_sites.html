@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Sites: "{{ search_text }}"{% endblock %}
+{% block content %}
+<script>
+</script>
+<div>
+<p><h2>Sites matching "{{ search_text }}"</h2>
+{% if results|length > 0 %}
+<p>Showing {{ page_range[0] }} to {{ page_range[1] }} of {{ total_result_count }}.
+{% endif %}
+<p>Page {{ page_num }} of {{ page_count }}.
+<form action="/search_sites" method="GET" style="display: inline;">
+	<input name="search_text" type="text" style="display: none;" value="{{ search_text }}"/>
+	<input name="site_type" type="text" style="display: none;" value="{{ site_type }}"/>
+	<input name="page" type="text" style="display: none;" value="1"/>
+	<input type="submit" value="first page" {% if page_num <= 1 %}disabled="disabled"{% endif %}/>
+</form>
+<form action="/search_sites" method="GET" style="display: inline;">
+	<input name="search_text" type="text" style="display: none;" value="{{ search_text }}"/>
+	<input name="site_type" type="text" style="display: none;" value="{{ site_type }}"/>
+	<input name="page" type="text" style="display: none;" value="{{ page_num - 1 }}"/>
+	<input type="submit" value="previous page" {% if page_num <= 1 %}disabled="disabled"{% endif %}/>
+</form>
+<form action="/search_sites" method="GET" style="display: inline;">
+	<input name="search_text" type="text" style="display: none;" value="{{ search_text }}"/>
+	<input name="site_type" type="text" style="display: none;" value="{{ site_type }}"/>
+	<input name="page" type="text" style="display: none;" value="{{ page_num + 1 }}"/>
+	<input type="submit" value="next page" {% if page_num >= page_count %}disabled="disabled"{% endif %}/>
+</form>
+<form action="/search_sites" method="GET" style="display: inline;">
+	<input name="search_text" type="text" style="display: none;" value="{{ search_text }}"/>
+	<input name="site_type" type="text" style="display: none;" value="{{ site_type }}"/>
+	<input name="page" type="text" style="display: none;" value="{{ page_count }}"/>
+	<input type="submit" value="last page" {% if page_num >= page_count %}disabled="disabled"{% endif %}/>
+</form>
+<ul>
+	{% for item in results %}
+	<li><a id="site-{{ item['id'] }}" target="_blank" href="/site?id={{ item['id'] }}">{{ item['name'] }}</a> ({{ item['type'] }})</li>
+	{% endfor %}
+</ul>
+{% if results|length > 0 %}
+<p>Page {{ page_num }} of {{ page_count }}.
+<form action="/search_sites" method="GET" style="display: inline;">
+	<input name="search_text" type="text" style="display: none;" value="{{ search_text }}"/>
+	<input name="site_type" type="text" style="display: none;" value="{{ site_type }}"/>
+	<input name="page" type="text" style="display: none;" value="1"/>
+	<input type="submit" value="first page" {% if page_num <= 1 %}disabled="disabled"{% endif %}/>
+</form>
+<form action="/search_sites" method="GET" style="display: inline;">
+	<input name="search_text" type="text" style="display: none;" value="{{ search_text }}"/>
+	<input name="site_type" type="text" style="display: none;" value="{{ site_type }}"/>
+	<input name="page" type="text" style="display: none;" value="{{ page_num - 1 }}"/>
+	<input type="submit" value="previous page" {% if page_num <= 1 %}disabled="disabled"{% endif %}/>
+</form>
+<form action="/search_sites" method="GET" style="display: inline;">
+	<input name="search_text" type="text" style="display: none;" value="{{ search_text }}"/>
+	<input name="site_type" type="text" style="display: none;" value="{{ site_type }}"/>
+	<input name="page" type="text" style="display: none;" value="{{ page_num + 1 }}"/>
+	<input type="submit" value="next page" {% if page_num >= page_count %}disabled="disabled"{% endif %}/>
+</form>
+<form action="/search_sites" method="GET" style="display: inline;">
+	<input name="search_text" type="text" style="display: none;" value="{{ search_text }}"/>
+	<input name="site_type" type="text" style="display: none;" value="{{ site_type }}"/>
+	<input name="page" type="text" style="display: none;" value="{{ page_count }}"/>
+	<input type="submit" value="last page" {% if page_num >= page_count %}disabled="disabled"{% endif %}/>
+</form>
+{% endif %}
+</div>
+{% endblock %}
+

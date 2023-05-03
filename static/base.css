@@ -1,0 +1,26 @@
+.header-title {
+	max-width: 80%;
+	margin: auto; 
+	background-color: lightgrey;
+	padding: 5px;
+}
+.header-outer {
+	margin: auto;
+	background-color: grey;
+}
+body {
+	background-color: grey;
+}
+.body-outer {
+	margin: auto;
+	background-color: grey;
+}
+.body-inner {
+	max-width: 80%;
+	margin: auto;
+	background-color: lightgrey;
+	padding: 5px;
+}
+div, form, input {
+	font-size: inherit;
+}

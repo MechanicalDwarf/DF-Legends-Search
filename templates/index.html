@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+	<h3>Load XML</h3>
+	<form method="post" action="/set_xml_path">
+		<label>XML path (Relative path from DF-Legends-Search is fine.)</label>
+		<input type="text" name="xml_path" value="{{ xml_path }}"/>
+		<input type="submit" value="Update XML path"/>
+	</form>
+	{% if xml_exists %}
+	<form method="post" action="/read_xml">
+		<label>WARNING: For older worlds, this takes lots of RAM. The page should load when reading is done.</label>
+		<input type="submit" value="Read XML" {% if db_exists %}disabled{% endif %}/>
+	</form>
+	{% endif %}
+	{% if db_exists %}
+	<h3>Search sites</h3>
+	<form method="get" action="/search_sites">
+		<label>Site name</label>
+		<input type="text" name="search_text"/>
+		<label>Site type</label>
+		<input type="text" name="site_type"/>
+		<input type="submit" value="Search"/>
+	</form>
+	<h3>Search historical figures</h3>
+	<form method="get" action="/search_histfigs">
+		<label>Historical figure name</label>
+		<input type="text" name="search_text"/>
+		<input type="submit" value="Search"/>
+	</form>
+	<h3>Search artifacts</h3>
+	<form method="get" action="/search_artifacts">
+		<label>Historical figure name</label>
+		<input type="text" name="search_text"/>
+		<input type="submit" value="Search"/>
+	</form>
+	{% elif xml_path != '' and not xml_exists %}
+	<b>XML file not found at: {{ xml_path }}</b>
+	{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Histfig: {{ histfig['name'] }}{% endblock %}
+{% block content %}
+<div>
+	<h2>{{ histfig['name'] }}</h2>
+	<h3>Race: {{ histfig['race'] }}</h3>
+	<h3>Caste: {{ histfig['caste'] }}</h3>
+	<h3>Born: {{ histfig['birth_year'] }}</h3>
+	<h3>Appeared: {{ histfig['appeared'] }}</h3>
+	{% if not histfig['not_dead'] %}
+	<h3>Died: {{ histfig['death_year'] }}</h3>
+	{% endif %}
+	{% if histfig['artifacts']|length > 0 %}
+	<h3>Holding artifacts:</h3>
+	<ul>
+		{% for artifact in histfig['artifacts'] %}
+		<li>
+			<a href="/artifact?id={{ artifact['id'] }}">{{ artifact['name'] }}</a>
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	{% if histfig['histfigs']|length > 0 %}
+	<h3>Linked historical figures:</h3>
+	<ul>
+		{% for rel_histfig in histfig['histfigs'] %}
+		<li>
+			{{ rel_histfig['link_type'] }}: <a href="/histfig?id={{ rel_histfig['id'] }}">{{ rel_histfig['name'] }}</a>
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	{% if histfig['sites']|length > 0 %}
+	<h3>Linked sites:</h3>
+	<ul>
+		{% for site in histfig['sites'] %}
+		<li>
+			{{ site['link_type'] }}: <a href="/site?id={{ site['id'] }}">{{ site['name'] }}</a>
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	{% if histfig['skills']|length > 0 %}
+	<h3>Skills:</h3>
+	<ul>
+		{% for skill in histfig['skills'] %}
+		<li>
+			{{ skill['skill'] }}: {{ skill['total_ip'] }}
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	{% if histfig['historical_events']|length > 0 %}
+	<h3>Related historical events:</h3>
+	<ul>
+		{% for event in histfig['historical_events'] %}
+		<li>
+			{{ event['year'] }}: <a href="/event?id={{ event['id'] }}">{{ event['type'] }}</a>
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+</div>
+{% endblock %}
