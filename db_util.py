@@ -243,7 +243,7 @@ def get_artifact_details(art_id):
 def get_event_details(evt_id):
     con = get_con()
     cur = con.cursor()
-    query_txt = 'select id, year, type, state, coords, knowledge, hfid, site_id, artifact_id, entity_id, civ_id, attacker_civ_id, defender_civ_id, attacker_general_hfid, defender_general_hfid from historical_events where id = ?'
+    query_txt = 'select id, year, type, state, coords, knowledge, hfid, site_id, artifact_id, entity_id, civ_id, attacker_civ_id, defender_civ_id, attacker_general_hfid, defender_general_hfid, slayer_hfid from historical_events where id = ?'
     cur.execute(query_txt, (evt_id,))
     vals = cur.fetchone()
     event = {
@@ -262,6 +262,7 @@ def get_event_details(evt_id):
         'defender_civ': '',
         'attacker_general': '',
         'defender_general': '',
+        'slayer': '',
     }
     hfid = vals[6]
     site_id = vals[7]
@@ -272,6 +273,7 @@ def get_event_details(evt_id):
     defender_civ_id = vals[12]
     attacker_general_hfid = vals[13]
     defender_general_hfid = vals[14]
+    slayer_hfid = vals[15]
     if hfid > -1:
         query_txt = 'select id, name from historical_figures where id = ?'
         cur.execute(query_txt, (hfid,))
@@ -330,7 +332,7 @@ def get_event_details(evt_id):
         }
     if attacker_general_hfid > -1:
         query_txt = 'select id, name from historical_figures where id = ?'
-        cur.execute(query_txt, (attacker_civ_id,))
+        cur.execute(query_txt, (attacker_general_hfid,))
         vals = cur.fetchone()
         event['attacker_general'] = {
             'id': vals[0],
@@ -338,9 +340,17 @@ def get_event_details(evt_id):
         }
     if defender_general_hfid > -1:
         query_txt = 'select id, name from historical_figures where id = ?'
-        cur.execute(query_txt, (defender_civ_id,))
+        cur.execute(query_txt, (defender_general_hfid,))
         vals = cur.fetchone()
         event['defender_general'] = {
+            'id': vals[0],
+            'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
+        }
+    if slayer_hfid > -1:
+        query_txt = 'select id, name from historical_figures where id = ?'
+        cur.execute(query_txt, (slayer_hfid,))
+        vals = cur.fetchone()
+        event['slayer'] = {
             'id': vals[0],
             'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
         }

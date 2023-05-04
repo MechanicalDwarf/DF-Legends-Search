@@ -40,5 +40,8 @@
 	{% if event['defender_general'] != '' %}
 	<h3>Defender general: <a href="/histfig?id={{ event['defender_general']['id'] }}">{{ event['defender_general']['name'] }}</a></h3>
 	{% endif %}
+	{% if event['slayer'] != '' %}
+	<h3>Slayer: <a href="/histfig?id={{ event['slayer']['id'] }}">{{ event['slayer']['name'] }}</a></h3>
+	{% endif %}
 </div>
 {% endblock %}
