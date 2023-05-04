@@ -79,8 +79,8 @@ def create_db(dbname):
             ['integer', 'text']
     )
     new_table(con, 'historical_events',
-            ['id', 'year', 'seconds72', 'type', 'hfid', 'state', 'site_id', 'coords', 'knowledge', 'artifact_id', 'civ_id'],
-            ['integer', 'integer', 'integer', 'text', 'integer', 'text', 'integer', 'text', 'text', 'integer', 'integer']
+            ['id', 'year', 'seconds72', 'type', 'hfid', 'state', 'site_id', 'coords', 'knowledge', 'artifact_id', 'civ_id', 'entity_id', 'attacker_civ_id', 'defender_civ_id', 'attacker_general_hfid', 'defender_general_hfid'],
+            ['integer', 'integer', 'integer', 'text', 'integer', 'text', 'integer', 'text', 'text', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer']
     )
     new_table(con, 'historical_event_collections',
             ['id', 'start_year', 'start_seconds72', 'end_year', 'end_seconds72', 'type', 'site_id'],
@@ -373,6 +373,11 @@ def load_historical_events(tree, con):
         knowledge = ''
         artifact_id = '-1'
         civ_id = '-1'
+        entity_id = '-1'
+        attacker_civ_id = '-1'
+        defender_civ_id = '-1'
+        attacker_general_hfid = '-1'
+        defender_general_hfid = '-1'
         for detail in historical_event_elem:
             if detail.tag == 'id':
                 evt_id = detail.text
@@ -396,9 +401,19 @@ def load_historical_events(tree, con):
                 artifact_id = detail.text
             elif detail.tag == 'civ_id':
                 civ_id = detail.text
+            elif detail.tag == 'entity_id':
+                entity_id = detail.text
+            elif detail.tag == 'attacker_civ_id':
+                attacker_civ_id = detail.text
+            elif detail.tag == 'defender_civ_id':
+                defender_civ_id = detail.text
+            elif detail.tag == 'attacker_general_hfid':
+                attacker_general_hfid = detail.text
+            elif detail.tag == 'defender_general_hfid':
+                defender_general_hfid = detail.text
         do_insert(con, 'historical_events',
-            ['id', 'year', 'seconds72', 'type', 'hfid', 'state', 'site_id', 'coords', 'knowledge', 'artifact_id', 'civ_id'],
-            [evt_id, year, seconds72, evt_type, hfid, state, site_id, coords, knowledge, artifact_id, civ_id]
+            ['id', 'year', 'seconds72', 'type', 'hfid', 'state', 'site_id', 'coords', 'knowledge', 'artifact_id', 'civ_id', 'entity_id', 'attacker_civ_id', 'defender_civ_id', 'attacker_general_hfid', 'defender_general_hfid'],
+            [evt_id, year, seconds72, evt_type, hfid, state, site_id, coords, knowledge, artifact_id, civ_id, entity_id, attacker_civ_id, defender_civ_id, attacker_general_hfid, defender_general_hfid]
         )
 
 def load_all(fpath, dbname=None):

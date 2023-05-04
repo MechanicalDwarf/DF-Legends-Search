@@ -40,6 +40,16 @@
 		{% endfor %}
 	</ul>
 	{% endif %}
+	{% if histfig['entities']|length > 0 %}
+	<h3>Related entities:</h3>
+	<ul>
+		{% for entity in histfig['entities'] %}
+		<li>
+			{{ entity['link_type'] }}: <a href="/entity?id={{ entity['id'] }}">{{ entity['name'] }}</a>
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
 	{% if histfig['skills']|length > 0 %}
 	<h3>Skills:</h3>
 	<ul>

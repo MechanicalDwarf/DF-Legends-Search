@@ -5,7 +5,7 @@ import math
 
 import settings
 from db_util import search_sites, get_site_details, get_histfig_details, search_histfigs, search_artifacts, \
-    get_artifact_details, get_event_details
+    get_artifact_details, get_event_details, get_entity_details
 from read_xml import load_all
 
 app = Flask(__name__)
@@ -112,6 +112,12 @@ def event_details():
     event_id = request.args.get('id')
     event = get_event_details(event_id)
     return render_template('event.html', event=event)
+
+@app.route('/entity')
+def entity_details():
+    entity_id = request.args.get('id')
+    entity = get_entity_details(entity_id)
+    return render_template('entity.html', entity=entity)
 
 
 app.run(port=5000, debug=True)

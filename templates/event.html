@@ -22,5 +22,23 @@
 	{% if event['artifact'] != '' %}
 	<h3>Artifact: <a href="/artifact?id={{ event['artifact']['id'] }}">{{ event['artifact']['name'] }}</a></h3>
 	{% endif %}
+	{% if event['entity'] != '' %}
+	<h3>Entity: <a href="/entity?id={{ event['entity']['id'] }}">{{ event['entity']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['civ'] != '' %}
+	<h3>Civilization: <a href="/entity?id={{ event['civ']['id'] }}">{{ event['civ']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['attacker_civ'] != '' %}
+	<h3>Attacker civilization: <a href="/entity?id={{ event['attacker_civ']['id'] }}">{{ event['attacker_civ']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['defender_civ'] != '' %}
+	<h3>Defender civilization: <a href="/entity?id={{ event['defender_civ']['id'] }}">{{ event['defender_civ']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['attacker_general'] != '' %}
+	<h3>Attacker general: <a href="/histfig?id={{ event['attacker_general']['id'] }}">{{ event['attacker_general']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['defender_general'] != '' %}
+	<h3>Defender general: <a href="/histfig?id={{ event['defender_general']['id'] }}">{{ event['defender_general']['name'] }}</a></h3>
+	{% endif %}
 </div>
 {% endblock %}
