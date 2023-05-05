@@ -23,6 +23,16 @@
 		Current identity: <a href="/histfig?id={{ histfig['current_identity']['id'] }}">{{ histfig['current_identity']['name'] }}</a>
 	</h3>
 	{% endif %}
+	{% if histfig['used_identities']|length > 0 %}
+	<h3>Used identities:</h3>
+	<ul>
+		{% for identity in histfig['used_identities'] %}
+		<li>
+			<a href="/histfig?id={{ identity['id'] }}">{{ identity['name'] }}</a>
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
 	{% if histfig['artifacts']|length > 0 %}
 	<h3>Holding artifacts:</h3>
 	<ul>

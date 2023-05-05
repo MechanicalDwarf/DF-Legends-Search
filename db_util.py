@@ -235,6 +235,16 @@ def get_histfig_details(hfid):
             match[0],
         )
     histfig['interaction_knowledge'] = interaction_knowledge
+    # used identities
+    query_txt = 'select identity_id from hf_used_identity_ids where hfid = ?'
+    cur.execute(query_txt, (hfid,))
+    used_identities = []
+    for match in cur.fetchall():
+        used_identities.append({
+            'id': match[0],
+            'name': get_histfig_summary(cur, match[0]),
+        })
+    histfig['used_identities'] = used_identities
     return histfig
 
 def get_artifact_details(art_id):

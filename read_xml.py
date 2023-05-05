@@ -101,6 +101,10 @@ def create_db(dbname):
             ['hfid', 'interaction_knowledge'],
             ['integer', 'text']
     )
+    new_table(con, 'hf_used_identity_ids',
+            ['hfid', 'identity_id'],
+            ['integer', 'integer']
+    )
     new_table(con, 'entity_populations',
             ['id'],
             ['integer']
@@ -271,6 +275,7 @@ def load_histfigs(tree, con):
         goals = []
         honor_entities = []
         interaction_knowledge = []
+        used_identity_ids = []
         for detail in histfig_elem:
             if detail.tag == 'id':
                 hfid = detail.text
@@ -382,6 +387,10 @@ def load_histfigs(tree, con):
                 interaction_knowledge.append(
                     detail.text
                 )
+            elif detail.tag == 'used_identity_id':
+                used_identity_ids.append(
+                    detail.text
+                )
             else:
                 unmatched_tags.append('histfig - '+detail.tag)
         do_insert(con, 'historical_figures',
@@ -422,6 +431,11 @@ def load_histfigs(tree, con):
             do_insert(con, 'hf_interaction_knowledge',
                 ['hfid', 'interaction_knowledge'],
                 [hfid, knowledge]
+            )
+        for identity_id in used_identity_ids:
+            do_insert(con, 'hf_used_identity_ids',
+                ['hfid', 'identity_id'],
+                [hfid, identity_id]
             )
     add_unmatched_tags(unmatched_tags)
 

@@ -1,3 +1,6 @@
 xmls/
 *.db
 settings.json
+local.py
+local.txt
+
