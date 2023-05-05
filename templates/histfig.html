@@ -3,12 +3,25 @@
 {% block content %}
 <div>
 	<h2>{{ histfig['name'] }}</h2>
-	<h3>Race: {{ histfig['race'] }}</h3>
-	<h3>Caste: {{ histfig['caste'] }}</h3>
+	<h3>{{ histfig['caste'] }} {{ histfig['race'] }}</h3>
+	{% if histfig['is_deity'] %}
+	<h3>Deity</h3>
+	{% elif histfig['is_force'] %}
+	<h3>Force</h3>
+	{% else %}
 	<h3>Born: {{ histfig['birth_year'] }}</h3>
 	<h3>Appeared: {{ histfig['appeared'] }}</h3>
+	{% endif %}
 	{% if not histfig['not_dead'] %}
 	<h3>Died: {{ histfig['death_year'] }}</h3>
+	{% endif %}
+	{% if histfig['is_ghost'] %}
+	<h3>Ghost</h3>
+	{% endif %}
+	{% if histfig['current_identity'] != '' %}
+	<h3>
+		Current identity: <a href="/histfig?id={{ histfig['current_identity']['id'] }}">{{ histfig['current_identity']['name'] }}</a>
+	</h3>
 	{% endif %}
 	{% if histfig['artifacts']|length > 0 %}
 	<h3>Holding artifacts:</h3>

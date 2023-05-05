@@ -9,6 +9,17 @@ def read_xml(fpath):
     tree = ET.parse(fpath)
     return tree
 
+def add_unmatched_tags(new_tags):
+    old_tags = []
+    if os.path.exists('unmatched_tags.txt'):
+        fh = open('unmatched_tags.txt')
+        old_tags = fh.read().strip().split('\n')
+        fh.close()
+    new_tags = list(set(new_tags))
+    tags = old_tags + list(filter(lambda x: not x in old_tags, new_tags))
+    fh = open('unmatched_tags.txt', 'w')
+    fh.write('\n'.join(tags))
+    fh.close()
 
 # any field named 'id' is considered the primary key
 def new_table(con, name, fields, types):
@@ -46,13 +57,21 @@ def create_db(dbname):
             ['id', 'name', 'type', 'coords', 'rectangle'],
             ['integer', 'text', 'text', 'text', 'text']
     )
+    new_table(con, 'site_structures',
+            ['site_id', 'local_id', 'type', 'name'],
+            ['integer', 'integer', 'text', 'text']
+    )
+    new_table(con, 'site_properties',
+            ['site_id', 'local_id', 'type', 'owner_hfid'],
+            ['integer', 'integer', 'text', 'integer']
+    )
     new_table(con, 'artifacts',
             ['id', 'name', 'item', 'site_id', 'holder_hfid'],
             ['integer', 'text', 'text', 'integer', 'integer']
     )
     new_table(con, 'historical_figures',
-            ['id', 'name', 'race', 'caste', 'appeared', 'birth_year', 'death_year'],
-            ['integer', 'text', 'text', 'text', 'integer', 'integer', 'integer']
+            ['id', 'name', 'race', 'caste', 'appeared', 'birth_year', 'death_year', 'current_identity_id', 'animated_string', 'death_seconds72', 'active_interaction', 'is_animated', 'is_force', 'ent_pop_id', 'associated_type', 'is_deity', 'birth_seconds72', 'is_ghost'],
+            ['integer', 'text', 'text', 'text', 'integer', 'integer', 'integer', 'integer', 'text', 'integer', 'text', 'integer', 'integer', 'integer', 'text', 'integer', 'integer', 'integer']
     )
     new_table(con, 'hf_to_hf_links',
             ['hfid', 'link_type', 'target_hfid'],
@@ -134,12 +153,15 @@ def load_sites(tree, con):
             break
     if sites_elem is None:
         raise Exception('<sites> element not found.')
+    unmatched_tags = []
     for site_elem in sites_elem:
         site_id = None
         site_name = ''
         site_type = ''
         site_coords = ''
         rectangle = ''
+        structures = []
+        properties = []
         for detail in site_elem:
             if detail.tag == 'id':
                 site_id = detail.text
@@ -151,10 +173,55 @@ def load_sites(tree, con):
                 site_coords = detail.text
             elif detail.tag == 'rectangle':
                 rectangle = detail.text
+            elif detail.tag == 'structures':
+                local_id = '-1'
+                struct_type = ''
+                struct_name = ''
+                for subdetail in detail:
+                    if subdetail.tag == 'local_id':
+                        local_id = subdetail.text
+                    elif subdetail.tag == 'type':
+                        struct_type = subdetail.text
+                    elif subdetail.tag == 'name':
+                        struct_name = subdetail.text
+                structures.append({
+                    'local_id': local_id,
+                    'type': struct_type,
+                    'name': struct_name
+                })
+            elif detail.tag == 'properties':
+                local_id = '-1'
+                prop_type = ''
+                owner_hfid = '-1'
+                for subdetail in detail:
+                    if subdetail.tag == 'id':
+                        local_id = subdetail.text
+                    elif subdetail.tag == 'type':
+                        prop_type = subdetail.text
+                    elif subdetail.tag == 'owner_hfid':
+                        owner_hfid = subdetail.text
+                structures.append({
+                    'local_id': local_id,
+                    'type': prop_type,
+                    'owner_hfid': owner_hfid
+                })
+            else:
+                unmatched_tags.append('site - '+detail.tag)
         do_insert(con, 'sites',
             ['id', 'name', 'type', 'coords', 'rectangle'],
             [site_id, site_name, site_type, site_coords, rectangle]
         )
+        for structure in structures:
+            do_insert(con, 'site_structures',
+                ['site_id', 'local_id', 'type', 'name'],
+                [site_id, structure['local_id'], structure['type'], structure['name']]
+            )
+        for prop in properties:
+            do_insert(con, 'site_properties',
+                ['site_id', 'local_id', 'type', 'owner_hfid'],
+                [site_id, prop['local_id'], prop['type'], prop['owner_hfid']]
+            )
+    add_unmatched_tags(unmatched_tags)
 
 def load_histfigs(tree, con):
     root = tree.getroot()
@@ -165,6 +232,7 @@ def load_histfigs(tree, con):
             break
     if histfigs_elem is None:
         raise Exception('<historical_figures> element not found.')
+    unmatched_tags = []
     for histfig_elem in histfigs_elem:
         hfid = None
         name = ''
@@ -173,6 +241,17 @@ def load_histfigs(tree, con):
         appeared = '-1'
         birth_year = '-1'
         death_year = '-1'
+        current_identity_id = '-1'
+        animated_string = ''
+        death_seconds72 = '-1'
+        active_interaction = ''
+        is_animated = '0'
+        is_force = '0'
+        ent_pop_id = '-1'
+        associated_type = ''
+        is_deity = '0'
+        birth_seconds72 = '-1'
+        is_ghost = '0'
         hf_links = []
         site_links = []
         entity_links = []
@@ -192,6 +271,28 @@ def load_histfigs(tree, con):
                 birth_year = detail.text
             elif detail.tag == 'death_year':
                 death_year = detail.text
+            elif detail.tag == 'current_identity_id':
+                current_identity_id = detail.text
+            elif detail.tag == 'animated_string':
+                animated_string = detail.text
+            elif detail.tag == 'death_seconds72':
+                death_seconds72 = detail.text
+            elif detail.tag == 'active_interaction':
+                active_interaction = detail.text
+            elif detail.tag == 'animated':
+                is_animated = '1'
+            elif detail.tag == 'force':
+                is_force = '1'
+            elif detail.tag == 'ent_pop_id':
+                ent_pop_id = detail.text
+            elif detail.tag == 'associated_type':
+                associated_type = detail.text
+            elif detail.tag == 'deity':
+                is_deity = '1'
+            elif detail.tag == 'birth_seconds72':
+                birth_seconds72 = detail.text
+            elif detail.tag == 'ghost':
+                is_ghost = '1'
             elif detail.tag == 'hf_link':
                 link_type = ''
                 target_hfid = ''
@@ -240,9 +341,11 @@ def load_histfigs(tree, con):
                     'skill': skill,
                     'total_ip': total_ip
                 })
+            else:
+                unmatched_tags.append('histfig - '+detail.tag)
         do_insert(con, 'historical_figures',
-            ['id', 'name', 'race', 'caste', 'appeared', 'birth_year', 'death_year'],
-            [hfid, name, race, caste, appeared, birth_year, death_year]
+            ['id', 'name', 'race', 'caste', 'appeared', 'birth_year', 'death_year', 'current_identity_id', 'animated_string', 'death_seconds72', 'active_interaction', 'is_animated', 'is_force', 'ent_pop_id', 'associated_type', 'is_deity', 'birth_seconds72', 'is_ghost'],
+            [hfid, name, race, caste, appeared, birth_year, death_year, current_identity_id, animated_string, death_seconds72, active_interaction, is_animated, is_force, ent_pop_id, associated_type, is_deity, birth_seconds72, is_ghost]
         )
         for hf_link in hf_links:
             do_insert(con, 'hf_to_hf_links',
@@ -264,6 +367,7 @@ def load_histfigs(tree, con):
                 ['hfid', 'skill', 'total_ip'],
                 [hfid, skill['skill'], skill['total_ip']]
             )
+    add_unmatched_tags(unmatched_tags)
 
 def load_artifacts(tree, con):
     root = tree.getroot()
@@ -274,6 +378,7 @@ def load_artifacts(tree, con):
             break
     if artifacts_elem is None:
         raise Exception('<artifacts> element not found.')
+    unmatched_tags = []
     for artifact_elem in artifacts_elem:
         art_id = None
         name = ''
@@ -291,10 +396,13 @@ def load_artifacts(tree, con):
                 site_id = detail.text
             elif detail.tag == 'holder_hfid':
                 holder_hfid = detail.text
+            else:
+                unmatched_tags.append('artifact - '+detail.tag)
         do_insert(con, 'artifacts',
             ['id', 'name', 'item', 'site_id', 'holder_hfid'],
             [art_id, name, item, site_id, holder_hfid]
         )
+    add_unmatched_tags(unmatched_tags)
 
 def load_written_contents(tree, con):
     root = tree.getroot()
@@ -305,6 +413,7 @@ def load_written_contents(tree, con):
             break
     if written_contents_elem is None:
         raise Exception('<written_contents> element not found.')
+    unmatched_tags = []
     for written_content_elem in written_contents_elem:
         writ_id = None
         title = ''
@@ -325,10 +434,13 @@ def load_written_contents(tree, con):
                 form = detail.text
             elif detail.tag == 'form_id':
                 form_id = detail.text
+            else:
+                unmatched_tags.append('written_content - '+detail.tag)
         do_insert(con, 'written_contents',
             ['id', 'title', 'author_hfid', 'author_roll', 'form', 'form_id'],
             [writ_id, title, author_hfid, author_roll, form, form_id]
         )
+    add_unmatched_tags(unmatched_tags)
 
 def load_entities(tree, con):
     root = tree.getroot()
@@ -339,6 +451,7 @@ def load_entities(tree, con):
             break
     if entities_elem is None:
         raise Exception('<entities> element not found.')
+    unmatched_tags = []
     for entity_elem in entities_elem:
         ent_id = None
         name = ''
@@ -347,10 +460,13 @@ def load_entities(tree, con):
                 ent_id = detail.text
             elif detail.tag == 'name':
                 name = detail.text
+            else:
+                unmatched_tags.append('entity - '+detail.tag)
         do_insert(con, 'entities',
             ['id', 'name'],
             [ent_id, name]
         )
+    add_unmatched_tags(unmatched_tags)
 
 def load_historical_events(tree, con):
     root = tree.getroot()
@@ -361,6 +477,7 @@ def load_historical_events(tree, con):
             break
     if historical_events_elem is None:
         raise Exception('<historical_events> element not found.')
+    unmatched_tags = []
     for historical_event_elem in historical_events_elem:
         evt_id = None
         year = '-1'
@@ -414,10 +531,13 @@ def load_historical_events(tree, con):
                 defender_general_hfid = detail.text
             elif detail.tag == 'slayer_hfid':
                 slayer_hfid = detail.text
+            else:
+                unmatched_tags.append('historical_event - '+detail.tag)
         do_insert(con, 'historical_events',
             ['id', 'year', 'seconds72', 'type', 'hfid', 'state', 'site_id', 'coords', 'knowledge', 'artifact_id', 'civ_id', 'entity_id', 'attacker_civ_id', 'defender_civ_id', 'attacker_general_hfid', 'defender_general_hfid', 'slayer_hfid'],
             [evt_id, year, seconds72, evt_type, hfid, state, site_id, coords, knowledge, artifact_id, civ_id, entity_id, attacker_civ_id, defender_civ_id, attacker_general_hfid, defender_general_hfid, slayer_hfid]
         )
+    add_unmatched_tags(unmatched_tags)
 
 def load_all(fpath, dbname=None):
     if dbname is None:

@@ -32,8 +32,7 @@
 <ul>
 	{% for item in results %}
 	<li>
-		<a id="site-{{ item['id'] }}" target="_blank" href="/histfig?id={{ item['id'] }}">{{ item['name'] }}</a>, {{ item['race'] }}
-		{% if not item['not_dead'] %} (DEAD) {% endif %}
+		<a id="site-{{ item['id'] }}" target="_blank" href="/histfig?id={{ item['id'] }}">{{ item['name'] }}</a>
 	</li>
 	{% endfor %}
 </ul>

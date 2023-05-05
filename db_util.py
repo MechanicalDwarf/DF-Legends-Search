@@ -1,6 +1,8 @@
 import sqlite3
 import os
 import settings
+from summary_util import get_histfig_summary
+
 
 def get_con():
     dbpath = settings.get_setting('db_name') + '.db'
@@ -38,15 +40,13 @@ def search_sites(search_text, site_type=None, page_num=1, page_size=50):
 def search_histfigs(search_text, page_num=1, page_size=50):
     con = get_con()
     cur = con.cursor()
-    query_txt = 'select id, name, race, death_year from historical_figures where name like ? order by id limit ? offset ?'
+    query_txt = 'select id from historical_figures where name like ? order by id limit ? offset ?'
     cur.execute(query_txt, ('%'+search_text+'%', page_size, page_size * (page_num - 1)))
     matches = []
     for result in cur.fetchall():
         matches.append({
             'id': result[0],
-            'name': result[1] if len(result[1]) > 0 else 'unnamed',
-            'race': result[2],
-            'not_dead': result[3] == -1,
+            'name': get_histfig_summary(cur, result[0])
         })
     count_txt = 'select count(*) from historical_figures where name like ?'
     cur.execute(count_txt, ('%'+search_text+'%',))
@@ -84,14 +84,14 @@ def get_site_details(site_id):
         'coords': vals[3],
         'rectangle': vals[4],
     }
-    query_txt = 'select hf.id, hf.name, hfl.link_type from historical_figures hf inner join hf_to_site_links hfl on hf.id=hfl.hfid where hfl.site_id = ? order by hfl.link_type asc'
+    query_txt = 'select hf.id, hfl.link_type from historical_figures hf inner join hf_to_site_links hfl on hf.id=hfl.hfid where hfl.site_id = ? order by hfl.link_type asc'
     cur.execute(query_txt, (site_id,))
     histfigs = []
     for match in cur.fetchall():
         histfigs.append({
             'id': match[0],
-            'name': match[1] if len(match[1]) > 0 else 'unnamed',
-            'link_type': match[2]
+            'name': get_histfig_summary(cur, match[1]),
+            'link_type': match[1]
         })
     site['histfigs'] = histfigs
     query_txt = 'select id, name from artifacts where site_id = ?'
@@ -119,19 +119,29 @@ def get_histfig_details(hfid):
     con = get_con()
     cur = con.cursor()
     # basic info
-    query_txt = 'select id, name, race, caste, appeared, birth_year, death_year from historical_figures where id = ?'
+    query_txt = 'select id, name, race, caste, appeared, birth_year, death_year, is_deity, is_force, is_ghost, current_identity_id from historical_figures where id = ?'
     cur.execute(query_txt, (hfid,))
     vals = cur.fetchone()
     histfig = {
         'id': vals[0],
-        'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
-        'race': vals[2],
-        'caste': vals[3],
+        'name': vals[1].title() if len(vals[1]) > 0 else 'unnamed',
+        'race': vals[2].lower().replace('_', ' '),
+        'caste': vals[3].lower(),
         'appeared': vals[4],
         'birth_year': vals[5],
         'death_year': vals[6],
         'not_dead': vals[6] == -1,
+        'is_deity': vals[7] == 1,
+        'is_force': vals[8] == 1,
+        'is_ghost': vals[9] == 1,
+        'current_identity': '',
     }
+    current_identity_id = vals[10]
+    if current_identity_id > -1:
+        histfig['current_identity'] = {
+            'id': current_identity_id,
+            'name': get_histfig_summary(cur, current_identity_id),
+        }
     # related sites
     query_txt = 'select s.id, s.name, sl.link_type from sites s inner join hf_to_site_links sl on s.id=sl.site_id where sl.hfid = ? order by sl.link_type asc'
     cur.execute(query_txt, (hfid,))
@@ -144,14 +154,14 @@ def get_histfig_details(hfid):
         })
     histfig['sites'] = sites
     # related historical figures
-    query_txt = 'select hf.id, hf.name, hfl.link_type from historical_figures hf inner join hf_to_hf_links hfl on hf.id=hfl.target_hfid where hfl.hfid = ? order by hfl.link_type asc'
+    query_txt = 'select hf.id, hfl.link_type from historical_figures hf inner join hf_to_hf_links hfl on hf.id=hfl.target_hfid where hfl.hfid = ? order by hfl.link_type asc'
     cur.execute(query_txt, (hfid,))
     rel_histfigs = []
     for match in cur.fetchall():
         rel_histfigs.append({
             'id': match[0],
-            'name': match[1] if len(match[1]) > 0 else 'unnamed',
-            'link_type': match[2]
+            'name': get_histfig_summary(cur, match[0]),
+            'link_type': match[1]
         })
     histfig['histfigs'] = rel_histfigs
     # related entities
@@ -221,12 +231,9 @@ def get_artifact_details(art_id):
             'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
         }
     if holder_id > -1:
-        query_txt = 'select id, name from historical_figures where id = ?'
-        cur.execute(query_txt, (holder_id,))
-        vals = cur.fetchone()
         artifact['holder'] = {
-            'id': vals[0],
-            'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
+            'id': holder_id,
+            'name': get_histfig_summary(cur, holder_id),
         }
     query_txt = 'select id, year, type from historical_events where artifact_id = ?'
     cur.execute(query_txt, (art_id,))
@@ -275,12 +282,9 @@ def get_event_details(evt_id):
     defender_general_hfid = vals[14]
     slayer_hfid = vals[15]
     if hfid > -1:
-        query_txt = 'select id, name from historical_figures where id = ?'
-        cur.execute(query_txt, (hfid,))
-        vals = cur.fetchone()
         event['histfig'] = {
-            'id': vals[0],
-            'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
+            'id': hfid,
+            'name': get_histfig_summary(cur, hfid),
         }
     if site_id > -1:
         query_txt = 'select id, name from sites where id = ?'
@@ -331,28 +335,19 @@ def get_event_details(evt_id):
             'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
         }
     if attacker_general_hfid > -1:
-        query_txt = 'select id, name from historical_figures where id = ?'
-        cur.execute(query_txt, (attacker_general_hfid,))
-        vals = cur.fetchone()
         event['attacker_general'] = {
-            'id': vals[0],
-            'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
+            'id': attacker_general_hfid,
+            'name': get_histfig_summary(cur, attacker_general_hfid),
         }
     if defender_general_hfid > -1:
-        query_txt = 'select id, name from historical_figures where id = ?'
-        cur.execute(query_txt, (defender_general_hfid,))
-        vals = cur.fetchone()
         event['defender_general'] = {
-            'id': vals[0],
-            'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
+            'id': defender_general_hfid,
+            'name': get_histfig_summary(cur, defender_general_hfid),
         }
     if slayer_hfid > -1:
-        query_txt = 'select id, name from historical_figures where id = ?'
-        cur.execute(query_txt, (slayer_hfid,))
-        vals = cur.fetchone()
         event['slayer'] = {
-            'id': vals[0],
-            'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
+            'id': slayer_hfid,
+            'name': get_histfig_summary(cur, slayer_hfid),
         }
     return event
 
