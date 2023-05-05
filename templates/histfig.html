@@ -33,6 +33,16 @@
 		{% endfor %}
 	</ul>
 	{% endif %}
+	{% if histfig['goals']|length > 0 %}
+	<h3>Goals:</h3>
+	<ul>
+		{% for goal in histfig['goals'] %}
+		<li>
+			{{ goal['goal'] }}
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
 	{% if histfig['histfigs']|length > 0 %}
 	<h3>Linked historical figures:</h3>
 	<ul>

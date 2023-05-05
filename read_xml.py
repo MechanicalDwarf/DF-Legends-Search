@@ -89,6 +89,14 @@ def create_db(dbname):
             ['hfid', 'skill', 'total_ip'],
             ['integer', 'text', 'integer']
     )
+    new_table(con, 'hf_goals',
+            ['hfid', 'goal'],
+            ['integer', 'text']
+    )
+    new_table(con, 'hf_honor_entities',
+            ['hfid', 'entity_id', 'battles', 'kills', 'honor_id'],
+            ['integer', 'integer', 'integer', 'integer', 'integer']
+    )
     new_table(con, 'entity_populations',
             ['id'],
             ['integer']
@@ -256,6 +264,8 @@ def load_histfigs(tree, con):
         site_links = []
         entity_links = []
         skills = []
+        goals = []
+        honor_entities = []
         for detail in histfig_elem:
             if detail.tag == 'id':
                 hfid = detail.text
@@ -341,6 +351,28 @@ def load_histfigs(tree, con):
                     'skill': skill,
                     'total_ip': total_ip
                 })
+            elif detail.tag == 'goal':
+                goals.append(detail.text)
+            elif detail.tag == 'honor_entity':
+                entity_id = '-1'
+                battles = '0'
+                kills = '0'
+                honor_id = '-1'
+                for subdetail in detail:
+                    if subdetail.tag == 'entity':
+                        entity = subdetail.text
+                    elif subdetail.tag == 'battles':
+                        battles = subdetail.text
+                    elif subdetail.tag == 'kills':
+                        kills = subdetail.text
+                    elif subdetail.tag == 'honor_id':
+                        honor_id = subdetail.text
+                honor_entities.append({
+                    'entity_id': entity_id,
+                    'battles': battles,
+                    'kills': kills,
+                    'honor_id': honor_id,
+                })
             else:
                 unmatched_tags.append('histfig - '+detail.tag)
         do_insert(con, 'historical_figures',
@@ -366,6 +398,16 @@ def load_histfigs(tree, con):
             do_insert(con, 'hf_skills',
                 ['hfid', 'skill', 'total_ip'],
                 [hfid, skill['skill'], skill['total_ip']]
+            )
+        for goal in goals:
+            do_insert(con, 'hf_goals',
+                ['hfid', 'goal'],
+                [hfid, goal]
+            )
+        for honor_entity in honor_entities:
+            do_insert(con, 'hf_honor_entities',
+                ['hfid', 'entity_id', 'battles', 'kills', 'honor_id'],
+                [hfid, honor_entity['entity_id'], honor_entity['battles'], honor_entity['kills'], honor_entity['honor_id']]
             )
     add_unmatched_tags(unmatched_tags)
 

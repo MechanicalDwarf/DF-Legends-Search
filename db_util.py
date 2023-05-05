@@ -205,7 +205,27 @@ def get_histfig_details(hfid):
             'year': match[1],
             'type': match[2],
         })
-    histfig['historical_events'] = historical_events
+    # goals
+    query_txt = 'select goal from hf_goals where hfid = ?'
+    cur.execute(query_txt, (hfid,))
+    goals = []
+    for match in cur.fetchall():
+        goals.append({
+            'goal': match[0],
+        })
+    histfig['goals'] = goals
+    # honor entities
+    query_txt = 'select entity_id, battles, kills, honor_id from hf_honor_entities where hfid = ?'
+    cur.execute(query_txt, (hfid,))
+    honor_entities = []
+    for match in cur.fetchall():
+        honor_entities.append({
+            'entity_id': match[0],
+            'battles': match[1],
+            'kills': match[2],
+            'honor_id': match[3],
+        })
+    histfig['skills'] = skills
     return histfig
 
 def get_artifact_details(art_id):
