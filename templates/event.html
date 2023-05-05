@@ -49,6 +49,9 @@
 	{% if event['source_site'] != '' %}
 	<h3>Source site: <a href="/site?id={{ event['source_site']['id'] }}">{{ event['source_site']['name'] }}</a></h3>
 	{% endif %}
+	{% if event['dest_site'] != '' %}
+	<h3>Destination site: <a href="/site?id={{ event['dest_site']['id'] }}">{{ event['dest_site']['name'] }}</a></h3>
+	{% endif %}
 	{% if event['group_1_hf'] != '' %}
 	<h3>Group 1: <a href="/histfig?id={{ event['group_1_hf']['id'] }}">{{ event['group_1_hf']['name'] }}</a></h3>
 	{% endif %}
@@ -81,6 +84,27 @@
 	{% endif %}
 	{% if event['link'] != '' %}
 	<h3>Link: {{ event['link'] }}</h3>
+	{% endif %}
+	{% if event['corruptor'] != '' %}
+	<h3>Corruptor: <a href="/histfig?id={{ event['corruptor']['id'] }}">{{ event['corruptor']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['corruptor_identity'] != '' %}
+	<h3>Corruptor identity: <a href="/histfig?id={{ event['corruptor_identity']['id'] }}">{{ event['corruptor_identity']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['result'] != '' %}
+	<h3>Result: {{ event['result'] }}</h3>
+	{% endif %}
+	{% if event['circumstance'] != '' %}
+	<h3>Circumstance: {{ event['circumstance'] }}</h3>
+	{% endif %}
+	{% if event['topic'] != '' %}
+	<h3>Topic: {{ event['topic'] }}</h3>
+	{% endif %}
+	{% if event['trickster'] != '' %}
+	<h3>Trickster: <a href="/histfig?id={{ event['trickster']['id'] }}">{{ event['trickster']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['identity'] != '' %}
+	<h3>Identity: <a href="/histfig?id={{ event['identity']['id'] }}">{{ event['identity']['name'] }}</a></h3>
 	{% endif %}
 </div>
 {% endblock %}

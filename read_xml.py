@@ -110,8 +110,8 @@ def create_db(dbname):
             ['integer', 'text']
     )
     new_table(con, 'historical_events',
-            ['id', 'year', 'seconds72', 'type', 'hfid', 'state', 'site_id', 'coords', 'knowledge', 'artifact_id', 'civ_id', 'entity_id', 'attacker_civ_id', 'defender_civ_id', 'attacker_general_hfid', 'defender_general_hfid', 'slayer_hfid', 'cause', 'source_site_id', 'group_1_hfid', 'group_2_hfid', 'a_leader_hfid', 'd_leader_hfid', 'reason', 'entity_id_1', 'entity_id_2', 'leader_hfid', 'site_id_1', 'site_id_2', 'link',],
-            ['integer', 'integer', 'integer', 'text', 'integer', 'text', 'integer', 'text', 'text', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'text', 'integer', 'integer', 'integer', 'integer', 'integer', 'text', 'integer', 'integer', 'integer', 'integer', 'integer', 'text', ]
+            ['id', 'year', 'seconds72', 'type', 'hfid', 'state', 'site_id', 'coords', 'knowledge', 'artifact_id', 'civ_id', 'entity_id', 'attacker_civ_id', 'defender_civ_id', 'attacker_general_hfid', 'defender_general_hfid', 'slayer_hfid', 'cause', 'source_site_id', 'group_1_hfid', 'group_2_hfid', 'a_leader_hfid', 'd_leader_hfid', 'reason', 'entity_id_1', 'entity_id_2', 'leader_hfid', 'site_id_1', 'site_id_2', 'link', 'corruptor_hfid', 'corruptor_identity', 'result', 'circumstance', 'topic', 'trickster_hfid', 'identity_id', 'dest_site_id', ],
+            ['integer', 'integer', 'integer', 'text', 'integer', 'text', 'integer', 'text', 'text', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'text', 'integer', 'integer', 'integer', 'integer', 'integer', 'text', 'integer', 'integer', 'integer', 'integer', 'integer', 'text', 'integer', 'integer', 'integer', 'text', 'text', 'integer', 'integer', 'integer',]
     )
     new_table(con, 'historical_event_collections',
             ['id', 'start_year', 'start_seconds72', 'end_year', 'end_seconds72', 'type', 'site_id'],
@@ -569,6 +569,14 @@ def load_historical_events(tree, con):
         site_id_1 = '-1'
         site_id_2 = '-1'
         link = ''
+        corruptor_hfid = '-1'
+        corruptor_identity = '-1'
+        result = ''
+        circumstance = ''
+        topic = ''
+        trickster_hfid = '-1'
+        identity_id = '-1'
+        dest_site_id = '-1'
         for detail in historical_event_elem:
             if detail.tag == 'id':
                 evt_id = detail.text
@@ -630,11 +638,27 @@ def load_historical_events(tree, con):
                 site_id_2 = detail.text
             elif detail.tag == 'link':
                 link = detail.text
+            elif detail.tag == 'corruptor_hfid':
+                corruptor_hfid = detail.text
+            elif detail.tag == 'corruptor_identity':
+                corruptor_identity = detail.text
+            elif detail.tag == 'result':
+                result = detail.text
+            elif detail.tag == 'circumstance':
+                circumstance = detail.text
+            elif detail.tag == 'topic':
+                topic = detail.text
+            elif detail.tag == 'trickster_hfid':
+                trickster_hfid = detail.text
+            elif detail.tag == 'identity_id':
+                identity_id = detail.text
+            elif detail.tag == 'dest_site_id':
+                dest_site_id = detail.text
             else:
                 unmatched_tags.append('historical_event - '+detail.tag)
         do_insert(con, 'historical_events',
-            ['id', 'year', 'seconds72', 'type', 'hfid', 'state', 'site_id', 'coords', 'knowledge', 'artifact_id', 'civ_id', 'entity_id', 'attacker_civ_id', 'defender_civ_id', 'attacker_general_hfid', 'defender_general_hfid', 'slayer_hfid', 'cause', 'source_site_id', 'group_1_hfid', 'group_2_hfid', 'a_leader_hfid', 'd_leader_hfid', 'reason', 'entity_id_1', 'entity_id_2', 'leader_hfid', 'site_id_1', 'site_id_2', 'link', ],
-            [evt_id, year, seconds72, evt_type, hfid, state, site_id, coords, knowledge, artifact_id, civ_id, entity_id, attacker_civ_id, defender_civ_id, attacker_general_hfid, defender_general_hfid, slayer_hfid, cause, source_site_id, group_1_hfid, group_2_hfid, a_leader_hfid, d_leader_hfid, reason, entity_id_1, entity_id_2, leader_hfid, site_id_1, site_id_2, link, ]
+            ['id', 'year', 'seconds72', 'type', 'hfid', 'state', 'site_id', 'coords', 'knowledge', 'artifact_id', 'civ_id', 'entity_id', 'attacker_civ_id', 'defender_civ_id', 'attacker_general_hfid', 'defender_general_hfid', 'slayer_hfid', 'cause', 'source_site_id', 'group_1_hfid', 'group_2_hfid', 'a_leader_hfid', 'd_leader_hfid', 'reason', 'entity_id_1', 'entity_id_2', 'leader_hfid', 'site_id_1', 'site_id_2', 'link', 'corruptor_hfid', 'corruptor_identity', 'result', 'circumstance', 'topic', 'trickster_hfid', 'identity_id', 'dest_site_id', ],
+            [evt_id, year, seconds72, evt_type, hfid, state, site_id, coords, knowledge, artifact_id, civ_id, entity_id, attacker_civ_id, defender_civ_id, attacker_general_hfid, defender_general_hfid, slayer_hfid, cause, source_site_id, group_1_hfid, group_2_hfid, a_leader_hfid, d_leader_hfid, reason, entity_id_1, entity_id_2, leader_hfid, site_id_1, site_id_2, link, corruptor_hfid, corruptor_identity, result, circumstance, topic, trickster_hfid, identity_id, dest_site_id, ]
         )
     add_unmatched_tags(unmatched_tags)
 

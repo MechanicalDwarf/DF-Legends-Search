@@ -290,7 +290,7 @@ def get_artifact_details(art_id):
 def get_event_details(evt_id):
     con = get_con()
     cur = con.cursor()
-    query_txt = 'select id, year, type, state, coords, knowledge, hfid, site_id, artifact_id, entity_id, civ_id, attacker_civ_id, defender_civ_id, attacker_general_hfid, defender_general_hfid, slayer_hfid, cause, source_site_id, group_1_hfid, group_2_hfid, a_leader_hfid, d_leader_hfid, reason, entity_id_1, entity_id_2, leader_hfid, site_id_1, site_id_2, link from historical_events where id = ?'
+    query_txt = 'select id, year, type, state, coords, knowledge, hfid, site_id, artifact_id, entity_id, civ_id, attacker_civ_id, defender_civ_id, attacker_general_hfid, defender_general_hfid, slayer_hfid, cause, source_site_id, group_1_hfid, group_2_hfid, a_leader_hfid, d_leader_hfid, reason, entity_id_1, entity_id_2, leader_hfid, site_id_1, site_id_2, link, corruptor_hfid, corruptor_identity, result, circumstance, topic, trickster_hfid, identity_id, dest_site_id from historical_events where id = ?'
     cur.execute(query_txt, (evt_id,))
     vals = cur.fetchone()
     event = {
@@ -323,6 +323,14 @@ def get_event_details(evt_id):
         'site_1': '',
         'site_2': '',
         'link': vals[28],
+        'corruptor': '',
+        'corruptor_identity': '',
+        'result': vals[31],
+        'circumstance': vals[32],
+        'topic': vals[33],
+        'trickster': '',
+        'identity': '',
+        'dest_site': '',
     }
     hfid = vals[6]
     site_id = vals[7]
@@ -344,6 +352,11 @@ def get_event_details(evt_id):
     leader_hfid = vals[25]
     site_id_1 = vals[26]
     site_id_2 = vals[27]
+    corruptor_hfid = vals[29]
+    corruptor_identity_hfid = vals[30]
+    trickster_hfid = vals[34]
+    identity_id = vals[35]
+    dest_site_id = vals[36]
     if hfid > -1:
         event['histfig'] = {
             'id': hfid,
@@ -446,6 +459,31 @@ def get_event_details(evt_id):
         event['site_2'] = {
             'id': site_id_2,
             'name': get_site_summary(cur, site_id_2),
+        }
+    if corruptor_hfid > -1:
+        event['corruptor'] = {
+            'id': corruptor_hfid,
+            'name': get_histfig_summary(cur, corruptor_hfid),
+        }
+    if corruptor_identity_hfid > -1:
+        event['corruptor_identity'] = {
+            'id': corruptor_identity_hfid,
+            'name': get_histfig_summary(cur, corruptor_identity_hfid),
+        }
+    if trickster_hfid > -1:
+        event['trickster'] = {
+            'id': trickster_hfid,
+            'name': get_histfig_summary(cur, trickster_hfid),
+        }
+    if identity_id > -1:
+        event['identity'] = {
+            'id': identity_id,
+            'name': get_histfig_summary(cur, identity_id),
+        }
+    if dest_site_id > -1:
+        event['dest_site'] = {
+            'id': dest_site_id,
+            'name': get_site_summary(cur, dest_site_id),
         }
     return event
 
