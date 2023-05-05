@@ -110,8 +110,8 @@ def create_db(dbname):
             ['integer', 'text']
     )
     new_table(con, 'historical_events',
-            ['id', 'year', 'seconds72', 'type', 'hfid', 'state', 'site_id', 'coords', 'knowledge', 'artifact_id', 'civ_id', 'entity_id', 'attacker_civ_id', 'defender_civ_id', 'attacker_general_hfid', 'defender_general_hfid', 'slayer_hfid'],
-            ['integer', 'integer', 'integer', 'text', 'integer', 'text', 'integer', 'text', 'text', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer']
+            ['id', 'year', 'seconds72', 'type', 'hfid', 'state', 'site_id', 'coords', 'knowledge', 'artifact_id', 'civ_id', 'entity_id', 'attacker_civ_id', 'defender_civ_id', 'attacker_general_hfid', 'defender_general_hfid', 'slayer_hfid', 'cause', 'source_site_id', 'group_1_hfid', 'group_2_hfid', 'a_leader_hfid', 'd_leader_hfid', 'reason', 'entity_id_1', 'entity_id_2', 'leader_hfid', 'site_id_1', 'site_id_2', 'link',],
+            ['integer', 'integer', 'integer', 'text', 'integer', 'text', 'integer', 'text', 'text', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'integer', 'text', 'integer', 'integer', 'integer', 'integer', 'integer', 'text', 'integer', 'integer', 'integer', 'integer', 'integer', 'text', ]
     )
     new_table(con, 'historical_event_collections',
             ['id', 'start_year', 'start_seconds72', 'end_year', 'end_seconds72', 'type', 'site_id'],
@@ -556,6 +556,19 @@ def load_historical_events(tree, con):
         attacker_general_hfid = '-1'
         defender_general_hfid = '-1'
         slayer_hfid = '-1'
+        cause = ''
+        source_site_id = '-1'
+        group_1_hfid = '-1'
+        group_2_hfid = '-1'
+        a_leader_hfid = '-1'
+        d_leader_hfid = '-1'
+        reason = ''
+        entity_id_1 = '-1'
+        entity_id_2 = '-1'
+        leader_hfid = '-1'
+        site_id_1 = '-1'
+        site_id_2 = '-1'
+        link = ''
         for detail in historical_event_elem:
             if detail.tag == 'id':
                 evt_id = detail.text
@@ -591,11 +604,37 @@ def load_historical_events(tree, con):
                 defender_general_hfid = detail.text
             elif detail.tag == 'slayer_hfid':
                 slayer_hfid = detail.text
+            elif detail.tag == 'cause':
+                cause = detail.text
+            elif detail.tag == 'source_site_id':
+                source_site_id = detail.text
+            elif detail.tag == 'group_1_hfid':
+                group_1_hfid = detail.text
+            elif detail.tag == 'group_2_hfid':
+                group_2_hfid = detail.text
+            elif detail.tag == 'a_leader_hfid':
+                a_leader_hfid = detail.text
+            elif detail.tag == 'd_leader_hfid':
+                d_leader_hfid = detail.text
+            elif detail.tag == 'reason':
+                reason = detail.text
+            elif detail.tag == 'entity_id_1':
+                entity_id_1 = detail.text
+            elif detail.tag == 'entity_id_2':
+                entity_id_2 = detail.text
+            elif detail.tag == 'leader_hfid':
+                leader_hfid = detail.text
+            elif detail.tag == 'site_id_1':
+                site_id_1 = detail.text
+            elif detail.tag == 'site_id_2':
+                site_id_2 = detail.text
+            elif detail.tag == 'link':
+                link = detail.text
             else:
                 unmatched_tags.append('historical_event - '+detail.tag)
         do_insert(con, 'historical_events',
-            ['id', 'year', 'seconds72', 'type', 'hfid', 'state', 'site_id', 'coords', 'knowledge', 'artifact_id', 'civ_id', 'entity_id', 'attacker_civ_id', 'defender_civ_id', 'attacker_general_hfid', 'defender_general_hfid', 'slayer_hfid'],
-            [evt_id, year, seconds72, evt_type, hfid, state, site_id, coords, knowledge, artifact_id, civ_id, entity_id, attacker_civ_id, defender_civ_id, attacker_general_hfid, defender_general_hfid, slayer_hfid]
+            ['id', 'year', 'seconds72', 'type', 'hfid', 'state', 'site_id', 'coords', 'knowledge', 'artifact_id', 'civ_id', 'entity_id', 'attacker_civ_id', 'defender_civ_id', 'attacker_general_hfid', 'defender_general_hfid', 'slayer_hfid', 'cause', 'source_site_id', 'group_1_hfid', 'group_2_hfid', 'a_leader_hfid', 'd_leader_hfid', 'reason', 'entity_id_1', 'entity_id_2', 'leader_hfid', 'site_id_1', 'site_id_2', 'link', ],
+            [evt_id, year, seconds72, evt_type, hfid, state, site_id, coords, knowledge, artifact_id, civ_id, entity_id, attacker_civ_id, defender_civ_id, attacker_general_hfid, defender_general_hfid, slayer_hfid, cause, source_site_id, group_1_hfid, group_2_hfid, a_leader_hfid, d_leader_hfid, reason, entity_id_1, entity_id_2, leader_hfid, site_id_1, site_id_2, link, ]
         )
     add_unmatched_tags(unmatched_tags)
 

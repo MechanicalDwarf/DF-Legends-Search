@@ -43,5 +43,44 @@
 	{% if event['slayer'] != '' %}
 	<h3>Slayer: <a href="/histfig?id={{ event['slayer']['id'] }}">{{ event['slayer']['name'] }}</a></h3>
 	{% endif %}
+	{% if event['cause'] != '' %}
+	<h3>Cause: {{ event['cause'] }}</h3>
+	{% endif %}
+	{% if event['source_site'] != '' %}
+	<h3>Source site: <a href="/site?id={{ event['source_site']['id'] }}">{{ event['source_site']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['group_1_hf'] != '' %}
+	<h3>Group 1: <a href="/histfig?id={{ event['group_1_hf']['id'] }}">{{ event['group_1_hf']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['group_2_hf'] != '' %}
+	<h3>Group 2: <a href="/histfig?id={{ event['group_2']['id'] }}">{{ event['group_2']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['a_leader'] != '' %}
+	<h3>Attack leader: <a href="/histfig?id={{ event['a_leader']['id'] }}">{{ event['a_leader']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['d_leader'] != '' %}
+	<h3>Defense leader: <a href="/histfig?id={{ event['d_leader']['id'] }}">{{ event['d_leader']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['reason'] != '' %}
+	<h3>Reason: {{ event['reason'] }}</h3>
+	{% endif %}
+	{% if event['entity_1'] != '' %}
+	<h3>Entity 1: <a href="/histfig?id={{ event['entity_1']['id'] }}">{{ event['entity_1']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['entity_2'] != '' %}
+	<h3>Entity 2: <a href="/histfig?id={{ event['entity_2']['id'] }}">{{ event['entity_2']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['leader'] != '' %}
+	<h3>Leader: <a href="/histfig?id={{ event['leader']['id'] }}">{{ event['leader']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['site_1'] != '' %}
+	<h3>Site 1: <a href="/site?id={{ event['site_1']['id'] }}">{{ event['qqq']['site_1'] }}</a></h3>
+	{% endif %}
+	{% if event['site_2'] != '' %}
+	<h3>Site 2: <a href="/site?id={{ event['site_2']['id'] }}">{{ event['site_2']['name'] }}</a></h3>
+	{% endif %}
+	{% if event['link'] != '' %}
+	<h3>Link: {{ event['link'] }}</h3>
+	{% endif %}
 </div>
 {% endblock %}

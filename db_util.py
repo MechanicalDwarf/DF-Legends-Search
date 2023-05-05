@@ -1,7 +1,7 @@
 import sqlite3
 import os
 import settings
-from summary_util import get_histfig_summary
+from summary_util import get_histfig_summary, get_site_summary, get_entity_summary
 
 
 def get_con():
@@ -165,14 +165,14 @@ def get_histfig_details(hfid):
         })
     histfig['histfigs'] = rel_histfigs
     # related entities
-    query_txt = 'select e.id, e.name, el.link_type from entities e inner join hf_to_entity_links el on e.id=el.entity_id where el.hfid = ? order by el.link_type asc'
+    query_txt = 'select e.id, el.link_type from entities e inner join hf_to_entity_links el on e.id=el.entity_id where el.hfid = ? order by el.link_type asc'
     cur.execute(query_txt, (hfid,))
     entities = []
     for match in cur.fetchall():
         entities.append({
             'id': match[0],
-            'name': match[1] if len(match[1]) > 0 else 'unnamed',
-            'link_type': match[2]
+            'name': get_entity_summary(cur, match[0]),
+            'link_type': match[1]
         })
     histfig['entities'] = entities
     # skills
@@ -290,7 +290,7 @@ def get_artifact_details(art_id):
 def get_event_details(evt_id):
     con = get_con()
     cur = con.cursor()
-    query_txt = 'select id, year, type, state, coords, knowledge, hfid, site_id, artifact_id, entity_id, civ_id, attacker_civ_id, defender_civ_id, attacker_general_hfid, defender_general_hfid, slayer_hfid from historical_events where id = ?'
+    query_txt = 'select id, year, type, state, coords, knowledge, hfid, site_id, artifact_id, entity_id, civ_id, attacker_civ_id, defender_civ_id, attacker_general_hfid, defender_general_hfid, slayer_hfid, cause, source_site_id, group_1_hfid, group_2_hfid, a_leader_hfid, d_leader_hfid, reason, entity_id_1, entity_id_2, leader_hfid, site_id_1, site_id_2, link from historical_events where id = ?'
     cur.execute(query_txt, (evt_id,))
     vals = cur.fetchone()
     event = {
@@ -310,6 +310,19 @@ def get_event_details(evt_id):
         'attacker_general': '',
         'defender_general': '',
         'slayer': '',
+        'cause': vals[16],
+        'source_site': '',
+        'group_1_hf': '',
+        'group_2_hf': '',
+        'a_leader': '',
+        'd_leader': '',
+        'reason': vals[22],
+        'entity_1': '',
+        'entity_2': '',
+        'leader': '',
+        'site_1': '',
+        'site_2': '',
+        'link': vals[28],
     }
     hfid = vals[6]
     site_id = vals[7]
@@ -321,18 +334,25 @@ def get_event_details(evt_id):
     attacker_general_hfid = vals[13]
     defender_general_hfid = vals[14]
     slayer_hfid = vals[15]
+    source_site_id = vals[17]
+    group_1_hfid = vals[18]
+    group_2_hfid = vals[19]
+    a_leader_hfid = vals[20]
+    d_leader_hfid = vals[21]
+    entity_id_1 = vals[23]
+    entity_id_2 = vals[24]
+    leader_hfid = vals[25]
+    site_id_1 = vals[26]
+    site_id_2 = vals[27]
     if hfid > -1:
         event['histfig'] = {
             'id': hfid,
             'name': get_histfig_summary(cur, hfid),
         }
     if site_id > -1:
-        query_txt = 'select id, name from sites where id = ?'
-        cur.execute(query_txt, (site_id,))
-        vals = cur.fetchone()
         event['site'] = {
-            'id': vals[0],
-            'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
+            'id': site_id,
+            'name': get_site_summary(cur, site_id),
         }
     if art_id > -1:
         query_txt = 'select id, name from artifacts where id = ?'
@@ -343,36 +363,24 @@ def get_event_details(evt_id):
             'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
         }
     if ent_id > -1:
-        query_txt = 'select id, name from entities where id = ?'
-        cur.execute(query_txt, (ent_id,))
-        vals = cur.fetchone()
         event['entity'] = {
-            'id': vals[0],
-            'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
+            'id': ent_id,
+            'name': get_entity_summary(cur, ent_id),
         }
     if civ_id > -1:
-        query_txt = 'select id, name from entities where id = ?'
-        cur.execute(query_txt, (civ_id,))
-        vals = cur.fetchone()
         event['civ'] = {
-            'id': vals[0],
-            'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
+            'id': civ_id,
+            'name': get_entity_summary(cur, civ_id),
         }
     if attacker_civ_id > -1:
-        query_txt = 'select id, name from entities where id = ?'
-        cur.execute(query_txt, (attacker_civ_id,))
-        vals = cur.fetchone()
         event['attacker_civ'] = {
-            'id': vals[0],
-            'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
+            'id': attacker_civ_id,
+            'name': get_entity_summary(cur, attacker_civ_id),
         }
     if defender_civ_id > -1:
-        query_txt = 'select id, name from entities where id = ?'
-        cur.execute(query_txt, (defender_civ_id,))
-        vals = cur.fetchone()
         event['defender_civ'] = {
-            'id': vals[0],
-            'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
+            'id': defender_civ_id,
+            'name': get_entity_summary(cur, defender_civ_id),
         }
     if attacker_general_hfid > -1:
         event['attacker_general'] = {
@@ -388,6 +396,56 @@ def get_event_details(evt_id):
         event['slayer'] = {
             'id': slayer_hfid,
             'name': get_histfig_summary(cur, slayer_hfid),
+        }
+    if source_site_id > -1:
+        event['source_site'] = {
+            'id': source_site_id,
+            'name': get_site_summary(cur, source_site_id),
+        }
+    if group_1_hfid > -1:
+        event['group_1_hf'] = {
+            'id': group_1_hfid,
+            'name': get_histfig_summary(cur, group_1_hfid),
+        }
+    if group_2_hfid > -1:
+        event['group_2_hf'] = {
+            'id': group_2_hfid,
+            'name': get_histfig_summary(cur, group_2_hfid),
+        }
+    if a_leader_hfid > -1:
+        event['a_leader'] = {
+            'id': a_leader_hfid,
+            'name': get_histfig_summary(cur, a_leader_hfid),
+        }
+    if d_leader_hfid > -1:
+        event['d_leader'] = {
+            'id': d_leader_hfid,
+            'name': get_histfig_summary(cur, d_leader_hfid),
+        }
+    if entity_id_1 > -1:
+        event['entity_1'] = {
+            'id': entity_id_1,
+            'name': get_entity_summary(cur, entity_id_1),
+        }
+    if entity_id_2 > -1:
+        event['entity_2'] = {
+            'id': entity_id_2,
+            'name': get_entity_summary(cur, entity_id_2),
+        }
+    if leader_hfid > -1:
+        event['leader'] = {
+            'id': leader_hfid,
+            'name': get_histfig_summary(cur, leader_hfid),
+        }
+    if site_id_1 > -1:
+        event['site_1'] = {
+            'id': site_id_1,
+            'name': get_site_summary(cur, site_id_1),
+        }
+    if site_id_2 > -1:
+        event['site_2'] = {
+            'id': site_id_2,
+            'name': get_site_summary(cur, site_id_2),
         }
     return event
 
