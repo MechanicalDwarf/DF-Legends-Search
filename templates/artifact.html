@@ -3,6 +3,9 @@
 {% block content %}
 <div>
 	<h2>{{ artifact['name'] }}</h2>
+	{% if artifact['written_content'] != '' %}
+	<h3>Author: <a href="/histfig?id={{ artifact['written_content']['author_hfid'] }}">{{ artifact['written_content']['author_name'] }}</a></h3>
+	{% endif %}
 	{% if artifact['site'] != '' %}
 	<h3>Site: <a href="/site?id={{ artifact['site']['id'] }}">{{ artifact['site']['name'] }}</a></h3>
 	{% endif %}

@@ -43,6 +43,16 @@
 		{% endfor %}
 	</ul>
 	{% endif %}
+	{% if histfig['interaction_knowledge']|length > 0 %}
+	<h3>Interaction knowledge (e.g. necromancy):</h3>
+	<ul>
+		{% for know in histfig['interaction_knowledge'] %}
+		<li>
+			{{ know }}
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
 	{% if histfig['histfigs']|length > 0 %}
 	<h3>Linked historical figures:</h3>
 	<ul>

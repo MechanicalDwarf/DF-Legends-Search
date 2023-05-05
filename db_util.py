@@ -90,7 +90,7 @@ def get_site_details(site_id):
     for match in cur.fetchall():
         histfigs.append({
             'id': match[0],
-            'name': get_histfig_summary(cur, match[1]),
+            'name': get_histfig_summary(cur, match[0]),
             'link_type': match[1]
         })
     site['histfigs'] = histfigs
@@ -225,23 +225,34 @@ def get_histfig_details(hfid):
             'kills': match[2],
             'honor_id': match[3],
         })
-    histfig['skills'] = skills
+    histfig['honor_entities'] = honor_entities
+    # interaction knowledge
+    query_txt = 'select interaction_knowledge from hf_interaction_knowledge where hfid = ?'
+    cur.execute(query_txt, (hfid,))
+    interaction_knowledge = []
+    for match in cur.fetchall():
+        interaction_knowledge.append(
+            match[0],
+        )
+    histfig['interaction_knowledge'] = interaction_knowledge
     return histfig
 
 def get_artifact_details(art_id):
     con = get_con()
     cur = con.cursor()
-    query_txt = 'select id, name, site_id, holder_hfid from artifacts where id = ?'
+    query_txt = 'select name, site_id, holder_hfid, written_content_id from artifacts where id = ?'
     cur.execute(query_txt, (art_id,))
     vals = cur.fetchone()
     artifact = {
-        'id': vals[0],
-        'name': vals[1] if len(vals[1]) > 0 else 'unnamed',
+        'id': art_id,
+        'name': vals[0] if len(vals[0]) > 0 else 'unnamed',
         'site': '',
-        'holder': ''
+        'holder': '',
+        'written_content': '',
     }
-    site_id = vals[2]
-    holder_id = vals[3]
+    site_id = vals[1]
+    holder_id = vals[2]
+    written_content_id = vals[3]
     if site_id > -1:
         query_txt = 'select id, name from sites where id = ?'
         cur.execute(query_txt, (site_id,))
@@ -254,6 +265,15 @@ def get_artifact_details(art_id):
         artifact['holder'] = {
             'id': holder_id,
             'name': get_histfig_summary(cur, holder_id),
+        }
+    if written_content_id > -1:
+        query_txt = 'select author_hfid from written_contents where id = ?'
+        cur.execute(query_txt, (written_content_id,))
+        vals = cur.fetchone()
+        artifact['written_content'] = {
+            'id': written_content_id,
+            'author_hfid': vals[0],
+            'author_name': get_histfig_summary(cur, vals[0]),
         }
     query_txt = 'select id, year, type from historical_events where artifact_id = ?'
     cur.execute(query_txt, (art_id,))

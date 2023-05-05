@@ -66,8 +66,8 @@ def create_db(dbname):
             ['integer', 'integer', 'text', 'integer']
     )
     new_table(con, 'artifacts',
-            ['id', 'name', 'item', 'site_id', 'holder_hfid'],
-            ['integer', 'text', 'text', 'integer', 'integer']
+            ['id', 'name', 'site_id', 'holder_hfid', 'written_content_id'],
+            ['integer', 'text', 'integer', 'integer', 'integer']
     )
     new_table(con, 'historical_figures',
             ['id', 'name', 'race', 'caste', 'appeared', 'birth_year', 'death_year', 'current_identity_id', 'animated_string', 'death_seconds72', 'active_interaction', 'is_animated', 'is_force', 'ent_pop_id', 'associated_type', 'is_deity', 'birth_seconds72', 'is_ghost'],
@@ -96,6 +96,10 @@ def create_db(dbname):
     new_table(con, 'hf_honor_entities',
             ['hfid', 'entity_id', 'battles', 'kills', 'honor_id'],
             ['integer', 'integer', 'integer', 'integer', 'integer']
+    )
+    new_table(con, 'hf_interaction_knowledge',
+            ['hfid', 'interaction_knowledge'],
+            ['integer', 'text']
     )
     new_table(con, 'entity_populations',
             ['id'],
@@ -266,6 +270,7 @@ def load_histfigs(tree, con):
         skills = []
         goals = []
         honor_entities = []
+        interaction_knowledge = []
         for detail in histfig_elem:
             if detail.tag == 'id':
                 hfid = detail.text
@@ -373,6 +378,10 @@ def load_histfigs(tree, con):
                     'kills': kills,
                     'honor_id': honor_id,
                 })
+            elif detail.tag == 'interaction_knowledge':
+                interaction_knowledge.append(
+                    detail.text
+                )
             else:
                 unmatched_tags.append('histfig - '+detail.tag)
         do_insert(con, 'historical_figures',
@@ -409,6 +418,11 @@ def load_histfigs(tree, con):
                 ['hfid', 'entity_id', 'battles', 'kills', 'honor_id'],
                 [hfid, honor_entity['entity_id'], honor_entity['battles'], honor_entity['kills'], honor_entity['honor_id']]
             )
+        for knowledge in interaction_knowledge:
+            do_insert(con, 'hf_interaction_knowledge',
+                ['hfid', 'interaction_knowledge'],
+                [hfid, knowledge]
+            )
     add_unmatched_tags(unmatched_tags)
 
 def load_artifacts(tree, con):
@@ -424,25 +438,29 @@ def load_artifacts(tree, con):
     for artifact_elem in artifacts_elem:
         art_id = None
         name = ''
-        item = ''
         site_id = '-1'
         holder_hfid = '-1'
+        written_content_id = '-1'
         for detail in artifact_elem:
             if detail.tag == 'id':
                 art_id = detail.text
             elif detail.tag == 'name':
                 name = detail.text
-            elif detail.tag == 'item':
-                item = detail.text
             elif detail.tag == 'site_id':
                 site_id = detail.text
             elif detail.tag == 'holder_hfid':
                 holder_hfid = detail.text
+            elif detail.tag == 'item':
+                for subdetail in detail:
+                    if subdetail.tag == 'page_written_content_id':
+                        written_content_id = subdetail.text
+                    else:
+                        unmatched_tags.append('artifact - item - '+subdetail.tag)
             else:
                 unmatched_tags.append('artifact - '+detail.tag)
         do_insert(con, 'artifacts',
-            ['id', 'name', 'item', 'site_id', 'holder_hfid'],
-            [art_id, name, item, site_id, holder_hfid]
+            ['id', 'name', 'site_id', 'holder_hfid', 'written_content_id'],
+            [art_id, name, site_id, holder_hfid, written_content_id]
         )
     add_unmatched_tags(unmatched_tags)
 
@@ -603,4 +621,3 @@ def load_all(fpath, dbname=None):
     con.commit()
     print('Done.')
 
-#load_all(settings.get_setting('xml_path'), settings.get_setting('db_name'))
